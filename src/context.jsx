@@ -1,21 +1,29 @@
 import React, { useState, useContext, useEffect } from 'react'
 
 import axios from 'axios'
-const allMealsUrl = 'https://www.themealdb.com/api/json/v1/1/search.php?s='
+const allMealsUrl = 'https://www.themealdb.com/api/json/v1/1/search.php?s=aa'
 const randomMealUrl = 'https://www.themealdb.com/api/json/v1/1/random.php'
 
 const AppContext = React.createContext()
 
 const AppProvider = ({ children }) => {
+  const [loading, setLoading] = useState(false)
   const [meals, setMeals] = useState([])
+
   const fetchMeals = async (url) => {
+    setLoading(true)
     try {
       const { data } = await axios.get(url)
-      setMeals(data.meals)
+      if(data.meals) {
+          setMeals(data.meals)
+      }else {
+        setMeals([])
+      }
     }
     catch (e) {
       console.log(e.response)
     }
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -23,7 +31,7 @@ const AppProvider = ({ children }) => {
   }, [])
 
   return (
-    <AppContext.Provider value={{ meals }}>
+    <AppContext.Provider value={{ loading, meals }}>
       {children}
     </AppContext.Provider>
   )
