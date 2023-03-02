@@ -6,12 +6,42 @@ const randomMealUrl = 'https://www.themealdb.com/api/json/v1/1/random.php'
 
 const AppContext = React.createContext()
 
+
+
 const AppProvider = ({ children }) => {
   const [loading, setLoading] = useState(false)
   const [meals, setMeals] = useState([])
+
   const [searchTerm, setSearchTerm] = useState('')
+
   const [showModal, setShowModal] = useState(false)
   const [selectedMeal, setSelectedMeal] = useState(null)
+
+  const getFavoritesFromLocalStorage = () => {
+    let favorites = localStorage.getItem('favorites')
+    if(favorites) {
+      favorites = JSON.parse(localStorage.getItem('favorites'))
+    } else {
+      favorites = []
+    }
+    return favorites
+  }
+
+  const [favorites, setFavorites] = useState(getFavoritesFromLocalStorage());
+  
+  const addToFavorites = (idMeal) => {
+    const meal = meals.find((meal) => meal.idMeal === idMeal)
+    const alreadyFavorite = favorites.find((meal) => meal.idMeal === idMeal)
+    if(alreadyFavorite) return
+    const updatedFavorites = [...favorites, meal]
+    setFavorites(updatedFavorites)
+    localStorage.setItem("favorites", JSON.stringify(updatedFavorites))
+  }
+  const removeFromFavorites = (idMeal) => {
+    const updatedFavorites = favorites.filter((meal) => meal.idMeal !== idMeal)
+    setFavorites(updatedFavorites)
+    localStorage.setItem("favorites", JSON.stringify(updatedFavorites))
+  }
 
   const fetchMeals = async (url) => {
     setLoading(true)
@@ -44,7 +74,11 @@ const AppProvider = ({ children }) => {
 
   const selectMeal = (idMeal, favoriteMeal) => {
     let meal
-    meal = meals.find((meal) => meal.idMeal === idMeal)
+    if(favoriteMeal) {
+      meal = favorites.find((meal) => meal.idMeal === idMeal)
+    }else {
+      meal = meals.find( (meal) => meal.idMeal === idMeal)
+    }
     setSelectedMeal(meal)
     setShowModal(true)
   }
@@ -53,8 +87,17 @@ const AppProvider = ({ children }) => {
     setShowModal(false)
   }
 
+
+  // useEffect( () => {
+  //   window.addEventListener("scroll", () => {
+  //     if(window.scrollY > 1024 ) {
+  //       console.log("Reached")
+  //     }
+  //   })
+  // }, [])
+
   return (
-    <AppContext.Provider value={{ loading, meals, setSearchTerm, fetchRandomMeal, showModal, selectMeal, selectedMeal, closeModal }}>
+    <AppContext.Provider value={{ loading, meals, setSearchTerm, fetchRandomMeal, showModal, selectMeal, selectedMeal, closeModal, favorites, addToFavorites, removeFromFavorites }}>
       {children}
     </AppContext.Provider>
   )
