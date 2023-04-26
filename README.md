@@ -16,3 +16,4 @@ npm start
 ![Alt text](./images/homePage2.png)
 ![Alt text](./images/search.png)
 ![Alt text](./images/surpriseMe.png)
+![Alt text](./images/modal.png)
